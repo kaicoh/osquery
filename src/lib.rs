@@ -123,6 +123,33 @@ impl<T: Serialize> QueryBuilder<T> {
         }
     }
 
+    /// Sets "ids" query.
+    ///
+    /// ```
+    /// use osquery::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::<u64>::new()
+    ///     .ids(vec![34229, 91296])
+    ///     .build();
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "ids": {
+    ///             "values": [34229, 91296]
+    ///         }
+    ///     }
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn ids<S: IntoIterator<Item = u64>>(self, values: S) -> Self {
+        Self {
+            term_level: Some(TermLevel::ids(values)),
+        }
+    }
+
     pub fn build(self) -> Query<T> {
         Query {
             query: self.term_level.unwrap(),

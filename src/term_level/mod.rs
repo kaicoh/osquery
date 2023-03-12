@@ -1,9 +1,11 @@
 use serde::Serialize;
 
+mod ids;
 mod term;
 mod terms;
 mod terms_set;
 
+use ids::Ids;
 use term::Term;
 use terms::Terms;
 use terms_set::TermsSet;
@@ -16,6 +18,7 @@ pub enum TermLevel<T: Serialize> {
     Term(Term<T>),
     Terms(Terms<T>),
     TermsSet(TermsSet<T>),
+    Ids(Ids),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -37,5 +40,9 @@ impl<T: Serialize> TermLevel<T> {
         U: IntoIterator<Item = T>,
     {
         Self::TermsSet(TermsSet::new(field, value, min_should_match))
+    }
+
+    pub fn ids<S: IntoIterator<Item = u64>>(values: S) -> Self {
+        Self::Ids(Ids::new(values))
     }
 }
