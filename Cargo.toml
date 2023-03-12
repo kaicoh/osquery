@@ -2,7 +2,16 @@
 name = "osquery"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["kaicoh <sumireminami@gmail.com>"]
+keywords = ["opensearch", "query"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/kaicoh/osquery"
+documentation = "https://docs.rs/osquery"
+description = "Opensearch Query DSL builder"
 
 [dependencies]
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0"
