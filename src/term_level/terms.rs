@@ -24,9 +24,9 @@ impl<T: Serialize> Serialize for Terms<T> {
     where
         S: Serializer,
     {
-        let mut term = serializer.serialize_map(Some(1))?;
-        term.serialize_entry(&self.field, &self.value)?;
-        term.end()
+        let mut state = serializer.serialize_map(Some(1))?;
+        state.serialize_entry(&self.field, &self.value)?;
+        state.end()
     }
 }
 
