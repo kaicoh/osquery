@@ -43,7 +43,6 @@ impl<T: Serialize> QueryBuilder<T> {
     pub fn term<S: Into<String>>(field: S, value: T) -> Self {
         Self {
             term_level: Some(TermLevel::term(field, value)),
-            ..Self::default()
         }
     }
 
@@ -72,7 +71,6 @@ impl<T: Serialize> QueryBuilder<T> {
     {
         Self {
             term_level: Some(TermLevel::terms(field, value)),
-            ..Self::default()
         }
     }
 
