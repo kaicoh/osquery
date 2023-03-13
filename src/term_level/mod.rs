@@ -1,15 +1,18 @@
 use serde::Serialize;
 
 mod ids;
+mod range;
 mod term;
 mod terms;
 mod terms_set;
 
 use ids::Ids;
+use range::TermRange;
 use term::Term;
 use terms::Terms;
 use terms_set::TermsSet;
 
+pub use range::Range;
 pub use terms_set::MinShouldMatch;
 
 #[derive(Debug, Clone, Serialize)]
@@ -19,6 +22,7 @@ pub enum TermLevel<T: Serialize> {
     Terms(Terms<T>),
     TermsSet(TermsSet<T>),
     Ids(Ids),
+    Range(TermRange<T>),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -44,5 +48,9 @@ impl<T: Serialize> TermLevel<T> {
 
     pub fn ids<S: IntoIterator<Item = u64>>(values: S) -> Self {
         Self::Ids(Ids::new(values))
+    }
+
+    pub fn range<S: Into<String>>(field: S, value: Range<T>) -> Self {
+        Self::Range(TermRange::new(field, value))
     }
 }

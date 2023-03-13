@@ -150,6 +150,36 @@ impl<T: Serialize> QueryBuilder<T> {
         }
     }
 
+    /// Sets "range" query.
+    ///
+    /// ```
+    /// use osquery::{term_level::Range, QueryBuilder};
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .range("line_id", Range::gte(10).and_lte(20))
+    ///     .build();
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "range": {
+    ///             "line_id": {
+    ///                 "gte": 10,
+    ///                 "lte": 20,
+    ///             }
+    ///         }
+    ///     }
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn range<S: Into<String>>(self, field: S, value: term_level::Range<T>) -> Self {
+        Self {
+            term_level: Some(TermLevel::range(field, value)),
+        }
+    }
+
     pub fn build(self) -> Query<T> {
         Query {
             query: self.term_level.unwrap(),
