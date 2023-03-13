@@ -234,6 +234,35 @@ impl<T: Serialize> QueryBuilder<T> {
         }
     }
 
+    /// Sets "fuzzy" query.
+    ///
+    /// ```
+    /// use osquery::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .fuzzy("speaker", "HALET")
+    ///     .build();
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "fuzzy": {
+    ///             "speaker": {
+    ///                 "value": "HALET"
+    ///             }
+    ///         }
+    ///     }
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn fuzzy<S: Into<String>>(self, field: S, value: T) -> Self {
+        Self {
+            term_level: Some(TermLevel::fuzzy(field, value)),
+        }
+    }
+
     pub fn build(self) -> Query<T> {
         Query {
             query: self.term_level.unwrap(),

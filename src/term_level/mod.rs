@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 mod exists;
+mod fuzzy;
 mod ids;
 mod prefix;
 mod range;
@@ -9,6 +10,7 @@ mod terms;
 mod terms_set;
 
 use exists::Exists;
+use fuzzy::Fuzzy;
 use ids::Ids;
 use prefix::Prefix;
 use range::TermRange;
@@ -29,6 +31,7 @@ pub enum TermLevel<T: Serialize> {
     Range(TermRange<T>),
     Prefix(Prefix<T>),
     Exists(Exists),
+    Fuzzy(Fuzzy<T>),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -66,5 +69,9 @@ impl<T: Serialize> TermLevel<T> {
 
     pub fn exists<S: Into<String>>(field: S) -> Self {
         Self::Exists(Exists::new(field))
+    }
+
+    pub fn fuzzy<S: Into<String>>(field: S, value: T) -> Self {
+        Self::Fuzzy(Fuzzy::new(field, value))
     }
 }
