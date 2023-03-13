@@ -207,6 +207,33 @@ impl<T: Serialize> QueryBuilder<T> {
         }
     }
 
+    /// Sets "exists" query.
+    ///
+    /// ```
+    /// use osquery::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::<&str>::new()
+    ///     .exists("speaker")
+    ///     .build();
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "exists": {
+    ///             "field": "speaker"
+    ///         }
+    ///     }
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn exists<S: Into<String>>(self, field: S) -> Self {
+        Self {
+            term_level: Some(TermLevel::exists(field)),
+        }
+    }
+
     pub fn build(self) -> Query<T> {
         Query {
             query: self.term_level.unwrap(),

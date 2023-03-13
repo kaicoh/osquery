@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+mod exists;
 mod ids;
 mod prefix;
 mod range;
@@ -7,6 +8,7 @@ mod term;
 mod terms;
 mod terms_set;
 
+use exists::Exists;
 use ids::Ids;
 use prefix::Prefix;
 use range::TermRange;
@@ -26,6 +28,7 @@ pub enum TermLevel<T: Serialize> {
     Ids(Ids),
     Range(TermRange<T>),
     Prefix(Prefix<T>),
+    Exists(Exists),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -59,5 +62,9 @@ impl<T: Serialize> TermLevel<T> {
 
     pub fn prefix<S: Into<String>>(field: S, value: T) -> Self {
         Self::Prefix(Prefix::new(field, value))
+    }
+
+    pub fn exists<S: Into<String>>(field: S) -> Self {
+        Self::Exists(Exists::new(field))
     }
 }
