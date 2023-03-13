@@ -237,10 +237,17 @@ impl<T: Serialize> QueryBuilder<T> {
     /// Sets "fuzzy" query.
     ///
     /// ```
-    /// use osquery::QueryBuilder;
+    /// use osquery::{term_level::Fuzzy, QueryBuilder};
+    ///
+    /// let fuzzy = Fuzzy::new("HALET")
+    ///     .fuzziness("2")
+    ///     .max_expansions(40 as u64)
+    ///     .prefix_length(0 as u64)
+    ///     .transpositions(true)
+    ///     .rewrite("constant_score");
     ///
     /// let query = QueryBuilder::new()
-    ///     .fuzzy("speaker", "HALET")
+    ///     .fuzzy("speaker", fuzzy)
     ///     .build();
     ///
     /// let json = serde_json::to_value(query).unwrap();
@@ -249,15 +256,20 @@ impl<T: Serialize> QueryBuilder<T> {
     ///     "query": {
     ///         "fuzzy": {
     ///             "speaker": {
-    ///                 "value": "HALET"
-    ///             }
-    ///         }
-    ///     }
+    ///                 "value": "HALET",
+    ///                 "fuzziness": "2",
+    ///                 "max_expansions": 40,
+    ///                 "prefix_length": 0,
+    ///                 "transpositions": true,
+    ///                 "rewrite": "constant_score",
+    ///             },
+    ///         },
+    ///     },
     /// });
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn fuzzy<S: Into<String>>(self, field: S, value: T) -> Self {
+    pub fn fuzzy<S: Into<String>>(self, field: S, value: term_level::Fuzzy<T>) -> Self {
         Self {
             term_level: Some(TermLevel::fuzzy(field, value)),
         }

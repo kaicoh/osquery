@@ -10,7 +10,7 @@ mod terms;
 mod terms_set;
 
 use exists::Exists;
-use fuzzy::Fuzzy;
+use fuzzy::TermFuzzy;
 use ids::Ids;
 use prefix::Prefix;
 use range::TermRange;
@@ -18,6 +18,7 @@ use term::Term;
 use terms::Terms;
 use terms_set::TermsSet;
 
+pub use fuzzy::Fuzzy;
 pub use range::Range;
 pub use terms_set::MinShouldMatch;
 
@@ -31,7 +32,7 @@ pub enum TermLevel<T: Serialize> {
     Range(TermRange<T>),
     Prefix(Prefix<T>),
     Exists(Exists),
-    Fuzzy(Fuzzy<T>),
+    Fuzzy(TermFuzzy<T>),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -71,7 +72,7 @@ impl<T: Serialize> TermLevel<T> {
         Self::Exists(Exists::new(field))
     }
 
-    pub fn fuzzy<S: Into<String>>(field: S, value: T) -> Self {
-        Self::Fuzzy(Fuzzy::new(field, value))
+    pub fn fuzzy<S: Into<String>>(field: S, value: Fuzzy<T>) -> Self {
+        Self::Fuzzy(TermFuzzy::new(field, value))
     }
 }
