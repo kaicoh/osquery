@@ -8,6 +8,7 @@ mod range;
 mod term;
 mod terms;
 mod terms_set;
+mod wildcard;
 
 use exists::Exists;
 use fuzzy::TermFuzzy;
@@ -17,6 +18,7 @@ use range::TermRange;
 use term::Term;
 use terms::Terms;
 use terms_set::TermsSet;
+use wildcard::Wildcard;
 
 pub use fuzzy::Fuzzy;
 pub use range::Range;
@@ -33,6 +35,7 @@ pub enum TermLevel<T: Serialize> {
     Prefix(Prefix<T>),
     Exists(Exists),
     Fuzzy(TermFuzzy<T>),
+    Wildcard(Wildcard<T>),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -74,5 +77,9 @@ impl<T: Serialize> TermLevel<T> {
 
     pub fn fuzzy<S: Into<String>>(field: S, value: Fuzzy<T>) -> Self {
         Self::Fuzzy(TermFuzzy::new(field, value))
+    }
+
+    pub fn wildcard<S: Into<String>>(field: S, value: T) -> Self {
+        Self::Wildcard(Wildcard::new(field, value))
     }
 }
