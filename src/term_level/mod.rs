@@ -1,12 +1,14 @@
 use serde::Serialize;
 
 mod ids;
+mod prefix;
 mod range;
 mod term;
 mod terms;
 mod terms_set;
 
 use ids::Ids;
+use prefix::Prefix;
 use range::TermRange;
 use term::Term;
 use terms::Terms;
@@ -23,6 +25,7 @@ pub enum TermLevel<T: Serialize> {
     TermsSet(TermsSet<T>),
     Ids(Ids),
     Range(TermRange<T>),
+    Prefix(Prefix<T>),
 }
 
 impl<T: Serialize> TermLevel<T> {
@@ -52,5 +55,9 @@ impl<T: Serialize> TermLevel<T> {
 
     pub fn range<S: Into<String>>(field: S, value: Range<T>) -> Self {
         Self::Range(TermRange::new(field, value))
+    }
+
+    pub fn prefix<S: Into<String>>(field: S, value: T) -> Self {
+        Self::Prefix(Prefix::new(field, value))
     }
 }
