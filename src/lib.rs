@@ -304,6 +304,33 @@ impl<T: Serialize> QueryBuilder<T> {
         }
     }
 
+    /// Sets "regexp" query.
+    ///
+    /// ```
+    /// use osquery::QueryBuilder;
+    ///
+    /// let query = QueryBuilder::new()
+    ///     .regexp("play_name", "[a-zA-Z]amlet")
+    ///     .build();
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "regexp": {
+    ///             "play_name": "[a-zA-Z]amlet",
+    ///         },
+    ///     },
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn regexp<S: Into<String>>(self, field: S, value: T) -> Self {
+        Self {
+            term_level: Some(TermLevel::regexp(field, value)),
+        }
+    }
+
     pub fn build(self) -> Query<T> {
         Query {
             query: self.term_level.unwrap(),
