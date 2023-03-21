@@ -1,8 +1,10 @@
 use serde::Serialize;
 
 pub mod term_level;
+mod value;
 
 pub use term_level::TermLevel;
+pub use value::Value;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct QueryBuilder<T: Serialize> {
