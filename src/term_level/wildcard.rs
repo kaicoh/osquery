@@ -1,27 +1,32 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-pub struct Wildcard<T: Serialize> {
+pub struct Wildcard {
     field: String,
-    value: T,
+    value: Value,
 }
 
-impl<T: Serialize> Wildcard<T> {
-    pub fn new<S: Into<String>>(field: S, value: T) -> Self {
+impl Wildcard {
+    pub fn new<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             field: field.into(),
-            value,
+            value: value.into(),
         }
     }
 }
 
-impl<T: Serialize> Serialize for Wildcard<T> {
+impl Serialize for Wildcard {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut map: HashMap<&str, &T> = HashMap::new();
+        let mut map: HashMap<&str, &Value> = HashMap::new();
         map.insert("value", &self.value);
 
         let mut state = serializer.serialize_map(Some(1))?;

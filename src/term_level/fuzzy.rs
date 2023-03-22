@@ -1,14 +1,15 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
-pub struct TermFuzzy<T: Serialize> {
+pub struct TermFuzzy {
     field: String,
-    value: Fuzzy<T>,
+    value: Fuzzy,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct Fuzzy<T: Serialize> {
-    value: T,
+pub struct Fuzzy {
+    value: Value,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzziness: Option<String>,
@@ -26,11 +27,11 @@ pub struct Fuzzy<T: Serialize> {
     rewrite: Option<String>,
 }
 
-impl<T: Serialize> Fuzzy<T> {
+impl Fuzzy {
     /// Create fuzzy parameter.
-    pub fn new(value: T) -> Self {
+    pub fn new<S: Into<Value>>(value: S) -> Self {
         Self {
-            value,
+            value: value.into(),
             fuzziness: None,
             max_expansions: None,
             prefix_length: None,
@@ -80,8 +81,8 @@ impl<T: Serialize> Fuzzy<T> {
     }
 }
 
-impl<T: Serialize> TermFuzzy<T> {
-    pub fn new<S: Into<String>>(field: S, value: Fuzzy<T>) -> Self {
+impl TermFuzzy {
+    pub fn new<S: Into<String>>(field: S, value: Fuzzy) -> Self {
         Self {
             field: field.into(),
             value,
@@ -89,7 +90,7 @@ impl<T: Serialize> TermFuzzy<T> {
     }
 }
 
-impl<T: Serialize> Serialize for TermFuzzy<T> {
+impl Serialize for TermFuzzy {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

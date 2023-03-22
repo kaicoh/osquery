@@ -1,25 +1,27 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
-pub struct Terms<T: Serialize> {
+pub struct Terms {
     field: String,
-    value: Vec<T>,
+    value: Vec<Value>,
 }
 
-impl<T: Serialize> Terms<T> {
-    pub fn new<S, U>(field: S, value: U) -> Self
+impl Terms {
+    pub fn new<F, V, T>(field: F, value: V) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = T>,
+        T: Into<Value>,
     {
         Self {
             field: field.into(),
-            value: value.into_iter().collect(),
+            value: value.into_iter().map(|v| v.into()).collect(),
         }
     }
 }
 
-impl<T: Serialize> Serialize for Terms<T> {
+impl Serialize for Terms {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

@@ -1,105 +1,53 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
-pub struct TermRange<T: Serialize> {
+pub struct TermRange {
     field: String,
-    value: Range<T>,
+    value: Range,
 }
 
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct Range<T: Serialize> {
+#[derive(Debug, Clone, Default, serde::Serialize)]
+pub struct Range {
     #[serde(skip_serializing_if = "Option::is_none")]
-    gte: Option<T>,
+    gte: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    gt: Option<T>,
+    gt: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    lte: Option<T>,
+    lte: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    lt: Option<T>,
+    lt: Option<Value>,
 }
 
-impl<T: Serialize> Default for Range<T> {
-    fn default() -> Self {
-        Self {
-            gte: None,
-            gt: None,
-            lte: None,
-            lt: None,
+macro_rules! setter {
+    ($($attr:ident, $and_attr:ident),*) => {
+        impl Range {
+            $(
+                pub fn $attr<S: Into<Value>>(val: S) -> Self {
+                    Self {
+                        $attr: Some(val.into()),
+                        ..Self::default()
+                    }
+                }
+
+                pub fn $and_attr<S: Into<Value>>(self, val: S) -> Self {
+                    Self {
+                        $attr: Some(val.into()),
+                        ..self
+                    }
+                }
+            )*
         }
-    }
+    };
 }
 
-impl<T: Serialize> Range<T> {
-    /// Creates Range with gte field.
-    pub fn gte(value: T) -> Self {
-        Self {
-            gte: Some(value),
-            ..Self::default()
-        }
-    }
+setter!(gte, and_gte, lte, and_lte, gt, and_gt, lt, and_lt);
 
-    /// Creates Range with gt field.
-    pub fn gt(value: T) -> Self {
-        Self {
-            gt: Some(value),
-            ..Self::default()
-        }
-    }
-
-    /// Creates Range with lte field.
-    pub fn lte(value: T) -> Self {
-        Self {
-            lte: Some(value),
-            ..Self::default()
-        }
-    }
-
-    /// Creates Range with lt field.
-    pub fn lt(value: T) -> Self {
-        Self {
-            lt: Some(value),
-            ..Self::default()
-        }
-    }
-
-    /// Sets value to gte field.
-    pub fn and_gte(self, value: T) -> Self {
-        Self {
-            gte: Some(value),
-            ..self
-        }
-    }
-
-    /// Sets value to gt field.
-    pub fn and_gt(self, value: T) -> Self {
-        Self {
-            gt: Some(value),
-            ..self
-        }
-    }
-
-    /// Sets value to lte field.
-    pub fn and_lte(self, value: T) -> Self {
-        Self {
-            lte: Some(value),
-            ..self
-        }
-    }
-
-    /// Sets value to lt field.
-    pub fn and_lt(self, value: T) -> Self {
-        Self {
-            lt: Some(value),
-            ..self
-        }
-    }
-}
-
-impl<T: Serialize> TermRange<T> {
-    pub fn new<S: Into<String>>(field: S, value: Range<T>) -> Self {
+impl TermRange {
+    pub fn new<F: Into<String>>(field: F, value: Range) -> Self {
         Self {
             field: field.into(),
             value,
@@ -107,7 +55,7 @@ impl<T: Serialize> TermRange<T> {
     }
 }
 
-impl<T: Serialize> Serialize for TermRange<T> {
+impl Serialize for TermRange {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

@@ -1,14 +1,19 @@
 use serde::Serialize;
+use serde_json::Value;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Ids {
-    values: Vec<u64>,
+    values: Vec<Value>,
 }
 
 impl Ids {
-    pub fn new<T: IntoIterator<Item = u64>>(values: T) -> Self {
+    pub fn new<V, S>(values: V) -> Self
+    where
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
+    {
         Self {
-            values: values.into_iter().collect(),
+            values: values.into_iter().map(|v| v.into()).collect(),
         }
     }
 }

@@ -1,9 +1,10 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
-pub struct TermsSet<T: Serialize> {
+pub struct TermsSet {
     field: String,
-    value: Vec<T>,
+    value: Vec<Value>,
     min_should_match: MinShouldMatch,
 }
 
@@ -28,15 +29,16 @@ impl MinShouldMatch {
     }
 }
 
-impl<T: Serialize> TermsSet<T> {
-    pub fn new<S, U>(field: S, value: U, min_should_match: MinShouldMatch) -> Self
+impl TermsSet {
+    pub fn new<F, V, S>(field: F, value: V, min_should_match: MinShouldMatch) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
     {
         Self {
             field: field.into(),
-            value: value.into_iter().collect(),
+            value: value.into_iter().map(|v| v.into()).collect(),
             min_should_match,
         }
     }
@@ -54,7 +56,7 @@ struct TermsSetMinScript<'a, T: Serialize> {
     minimum_should_match_script: &'a MinShouldMatch,
 }
 
-impl<T: Serialize> Serialize for TermsSet<T> {
+impl Serialize for TermsSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

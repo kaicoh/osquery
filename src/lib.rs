@@ -1,21 +1,22 @@
 use serde::Serialize;
+use serde_json::Value;
 
 pub mod term_level;
 
 pub use term_level::TermLevel;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct QueryBuilder<T: Serialize> {
-    term_level: Option<TermLevel<T>>,
+pub struct QueryBuilder {
+    term_level: Option<TermLevel>,
 }
 
-impl<T: Serialize> Default for QueryBuilder<T> {
+impl Default for QueryBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: Serialize> QueryBuilder<T> {
+impl QueryBuilder {
     pub fn new() -> Self {
         Self { term_level: None }
     }
@@ -43,7 +44,11 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn term<S: Into<String>>(self, field: S, value: T) -> Self {
+    pub fn term<F, V>(self, field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             term_level: Some(TermLevel::term(field, value)),
         }
@@ -70,10 +75,11 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn terms<S, U>(self, field: S, value: U) -> Self
+    pub fn terms<F, V, S>(self, field: F, value: V) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
     {
         Self {
             term_level: Some(TermLevel::terms(field, value)),
@@ -108,15 +114,16 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn terms_set<S, U>(
+    pub fn terms_set<F, V, S>(
         self,
-        field: S,
-        value: U,
+        field: F,
+        value: V,
         min_should_match: term_level::MinShouldMatch,
     ) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
     {
         Self {
             term_level: Some(TermLevel::terms_set(field, value, min_should_match)),
@@ -128,7 +135,7 @@ impl<T: Serialize> QueryBuilder<T> {
     /// ```
     /// use osquery::QueryBuilder;
     ///
-    /// let query = QueryBuilder::<u64>::new()
+    /// let query = QueryBuilder::new()
     ///     .ids(vec![34229, 91296])
     ///     .build();
     ///
@@ -144,7 +151,11 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn ids<S: IntoIterator<Item = u64>>(self, values: S) -> Self {
+    pub fn ids<V, S>(self, values: V) -> Self
+    where
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
+    {
         Self {
             term_level: Some(TermLevel::ids(values)),
         }
@@ -174,7 +185,7 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn range<S: Into<String>>(self, field: S, value: term_level::Range<T>) -> Self {
+    pub fn range<F: Into<String>>(self, field: F, value: term_level::Range) -> Self {
         Self {
             term_level: Some(TermLevel::range(field, value)),
         }
@@ -201,7 +212,11 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn prefix<S: Into<String>>(self, field: S, value: T) -> Self {
+    pub fn prefix<F, V>(self, field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             term_level: Some(TermLevel::prefix(field, value)),
         }
@@ -212,7 +227,7 @@ impl<T: Serialize> QueryBuilder<T> {
     /// ```
     /// use osquery::QueryBuilder;
     ///
-    /// let query = QueryBuilder::<&str>::new()
+    /// let query = QueryBuilder::new()
     ///     .exists("speaker")
     ///     .build();
     ///
@@ -228,7 +243,7 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn exists<S: Into<String>>(self, field: S) -> Self {
+    pub fn exists<F: Into<String>>(self, field: F) -> Self {
         Self {
             term_level: Some(TermLevel::exists(field)),
         }
@@ -269,7 +284,7 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn fuzzy<S: Into<String>>(self, field: S, value: term_level::Fuzzy<T>) -> Self {
+    pub fn fuzzy<F: Into<String>>(self, field: F, value: term_level::Fuzzy) -> Self {
         Self {
             term_level: Some(TermLevel::fuzzy(field, value)),
         }
@@ -298,7 +313,11 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn wildcard<S: Into<String>>(self, field: S, value: T) -> Self {
+    pub fn wildcard<F, V>(self, field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             term_level: Some(TermLevel::wildcard(field, value)),
         }
@@ -325,13 +344,17 @@ impl<T: Serialize> QueryBuilder<T> {
     ///
     /// assert_eq!(json, expected);
     /// ```
-    pub fn regexp<S: Into<String>>(self, field: S, value: T) -> Self {
+    pub fn regexp<F, V>(self, field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             term_level: Some(TermLevel::regexp(field, value)),
         }
     }
 
-    pub fn build(self) -> Query<T> {
+    pub fn build(self) -> Query {
         Query {
             query: self.term_level.unwrap(),
         }
@@ -339,6 +362,6 @@ impl<T: Serialize> QueryBuilder<T> {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Query<T: Serialize> {
-    query: TermLevel<T>,
+pub struct Query {
+    query: TermLevel,
 }

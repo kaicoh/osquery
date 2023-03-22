@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_json::Value;
 
 mod exists;
 mod fuzzy;
@@ -28,65 +29,87 @@ pub use terms_set::MinShouldMatch;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum TermLevel<T: Serialize> {
-    Term(Term<T>),
-    Terms(Terms<T>),
-    TermsSet(TermsSet<T>),
+pub enum TermLevel {
+    Term(Term),
+    Terms(Terms),
+    TermsSet(TermsSet),
     Ids(Ids),
-    Range(TermRange<T>),
-    Prefix(Prefix<T>),
+    Range(TermRange),
+    Prefix(Prefix),
     Exists(Exists),
-    Fuzzy(TermFuzzy<T>),
-    Wildcard(Wildcard<T>),
-    Regexp(Regexp<T>),
+    Fuzzy(TermFuzzy),
+    Wildcard(Wildcard),
+    Regexp(Regexp),
 }
 
-impl<T: Serialize> TermLevel<T> {
-    pub fn term<S: Into<String>>(field: S, value: T) -> Self {
+impl TermLevel {
+    pub fn term<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self::Term(Term::new(field, value))
     }
 
-    pub fn terms<S, U>(field: S, value: U) -> Self
+    pub fn terms<F, V, S>(field: F, value: V) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
     {
         Self::Terms(Terms::new(field, value))
     }
 
-    pub fn terms_set<S, U>(field: S, value: U, min_should_match: MinShouldMatch) -> Self
+    pub fn terms_set<F, V, S>(field: F, value: V, min_should_match: MinShouldMatch) -> Self
     where
-        S: Into<String>,
-        U: IntoIterator<Item = T>,
+        F: Into<String>,
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
     {
         Self::TermsSet(TermsSet::new(field, value, min_should_match))
     }
 
-    pub fn ids<S: IntoIterator<Item = u64>>(values: S) -> Self {
+    pub fn ids<V, S>(values: V) -> Self
+    where
+        V: IntoIterator<Item = S>,
+        S: Into<Value>,
+    {
         Self::Ids(Ids::new(values))
     }
 
-    pub fn range<S: Into<String>>(field: S, value: Range<T>) -> Self {
+    pub fn range<F: Into<String>>(field: F, value: Range) -> Self {
         Self::Range(TermRange::new(field, value))
     }
 
-    pub fn prefix<S: Into<String>>(field: S, value: T) -> Self {
+    pub fn prefix<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self::Prefix(Prefix::new(field, value))
     }
 
-    pub fn exists<S: Into<String>>(field: S) -> Self {
+    pub fn exists<F: Into<String>>(field: F) -> Self {
         Self::Exists(Exists::new(field))
     }
 
-    pub fn fuzzy<S: Into<String>>(field: S, value: Fuzzy<T>) -> Self {
+    pub fn fuzzy<F: Into<String>>(field: F, value: Fuzzy) -> Self {
         Self::Fuzzy(TermFuzzy::new(field, value))
     }
 
-    pub fn wildcard<S: Into<String>>(field: S, value: T) -> Self {
+    pub fn wildcard<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self::Wildcard(Wildcard::new(field, value))
     }
 
-    pub fn regexp<S: Into<String>>(field: S, value: T) -> Self {
+    pub fn regexp<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self::Regexp(Regexp::new(field, value))
     }
 }

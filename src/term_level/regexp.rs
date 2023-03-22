@@ -1,21 +1,26 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
-pub struct Regexp<T: Serialize> {
+pub struct Regexp {
     field: String,
-    value: T,
+    value: Value,
 }
 
-impl<T: Serialize> Regexp<T> {
-    pub fn new<S: Into<String>>(field: S, value: T) -> Self {
+impl Regexp {
+    pub fn new<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             field: field.into(),
-            value,
+            value: value.into(),
         }
     }
 }
 
-impl<T: Serialize> Serialize for Regexp<T> {
+impl Serialize for Regexp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

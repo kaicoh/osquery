@@ -1,27 +1,32 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-pub struct Term<T: Serialize> {
+pub struct Term {
     field: String,
-    value: T,
+    value: Value,
 }
 
-impl<T: Serialize> Term<T> {
-    pub fn new<S: Into<String>>(field: S, value: T) -> Self {
+impl Term {
+    pub fn new<F, V>(field: F, value: V) -> Self
+    where
+        F: Into<String>,
+        V: Into<Value>,
+    {
         Self {
             field: field.into(),
-            value,
+            value: value.into(),
         }
     }
 }
 
-impl<T: Serialize> Serialize for Term<T> {
+impl Serialize for Term {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut map: HashMap<&str, &T> = HashMap::new();
+        let mut map: HashMap<&str, &Value> = HashMap::new();
         map.insert("value", &self.value);
 
         let mut term = serializer.serialize_map(Some(1))?;
