@@ -1,12 +1,18 @@
 use serde::Serialize;
 
-pub mod term_level;
 pub mod full_text;
+pub mod term_level;
 
 use term_level::TermLevel;
 
 #[derive(Debug, Clone)]
 pub struct Query;
+
+impl Default for Query {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl Query {
     pub fn new() -> Self {
@@ -40,7 +46,7 @@ impl Query {
     /// ```
     pub fn term_level<T: Into<TermLevel>>(self, query: T) -> TermLevelQuery {
         TermLevelQuery {
-            query: query.into()
+            query: query.into(),
         }
     }
 }

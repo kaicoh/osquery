@@ -9,7 +9,7 @@ use mtch::Match;
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FullText {
-    Match(Match)
+    Match(Match),
 }
 
 impl FullText {

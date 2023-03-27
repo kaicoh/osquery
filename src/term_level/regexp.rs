@@ -1,21 +1,28 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Regexp {
-    field: String,
-    value: Value,
+    field: Option<String>,
+    value: Option<Value>,
 }
 
 impl Regexp {
-    pub fn new<F, V>(field: F, value: V) -> Self
-    where
-        F: Into<String>,
-        V: Into<Value>,
-    {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn field<T: Into<String>>(self, field: T) -> Self {
         Self {
-            field: field.into(),
-            value: value.into(),
+            field: Some(field.into()),
+            ..self
+        }
+    }
+
+    pub fn value<T: Into<Value>>(self, value: T) -> Self {
+        Self {
+            value: Some(value.into()),
+            ..self
         }
     }
 }
@@ -26,7 +33,10 @@ impl Serialize for Regexp {
         S: Serializer,
     {
         let mut state = serializer.serialize_map(Some(1))?;
-        state.serialize_entry(&self.field, &self.value)?;
+        state.serialize_entry(
+            self.field.as_deref().unwrap_or_default(),
+            self.value.as_ref().unwrap_or(&Value::Null),
+        )?;
         state.end()
     }
 }
@@ -37,8 +47,9 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let wc = Regexp::new("play_name", "[a-zA-Z]amlet");
-        let json = serde_json::to_value(wc).unwrap();
+        let reg = Regexp::new().field("play_name").value("[a-zA-Z]amlet");
+
+        let json = serde_json::to_value(reg).unwrap();
 
         let expected = serde_json::json!({
             "play_name": "[a-zA-Z]amlet",

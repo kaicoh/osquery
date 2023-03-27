@@ -1,39 +1,48 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
-#[derive(Debug, Clone)]
-pub struct TermRange {
-    field: String,
-    value: Range,
-}
-
-#[derive(Debug, Clone, Default, serde::Serialize)]
+#[derive(Debug, Default, Clone)]
 pub struct Range {
-    #[serde(skip_serializing_if = "Option::is_none")]
+    field: Option<String>,
     gte: Option<Value>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     gt: Option<Value>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     lte: Option<Value>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     lt: Option<Value>,
 }
 
+#[derive(Debug, Clone, Default, serde::Serialize)]
+struct RangeValues<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    gte: Option<&'a Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    gt: Option<&'a Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lte: Option<&'a Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lt: Option<&'a Value>,
+}
+
+impl Range {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn field<T: Into<String>>(self, field: T) -> Self {
+        Self {
+            field: Some(field.into()),
+            ..self
+        }
+    }
+}
+
 macro_rules! setter {
-    ($($attr:ident, $and_attr:ident),*) => {
+    ($($attr:ident),*) => {
         impl Range {
             $(
-                pub fn $attr<S: Into<Value>>(val: S) -> Self {
-                    Self {
-                        $attr: Some(val.into()),
-                        ..Self::default()
-                    }
-                }
-
-                pub fn $and_attr<S: Into<Value>>(self, val: S) -> Self {
+                pub fn $attr<T: Into<Value>>(self, val: T) -> Self {
                     Self {
                         $attr: Some(val.into()),
                         ..self
@@ -44,24 +53,23 @@ macro_rules! setter {
     };
 }
 
-setter!(gte, and_gte, lte, and_lte, gt, and_gt, lt, and_lt);
+setter! { gte, lte, gt, lt }
 
-impl TermRange {
-    pub fn new<F: Into<String>>(field: F, value: Range) -> Self {
-        Self {
-            field: field.into(),
-            value,
-        }
-    }
-}
-
-impl Serialize for TermRange {
+impl Serialize for Range {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         let mut state = serializer.serialize_map(Some(1))?;
-        state.serialize_entry(&self.field, &self.value)?;
+
+        let val = RangeValues {
+            gte: self.gte.as_ref(),
+            gt: self.gt.as_ref(),
+            lte: self.lte.as_ref(),
+            lt: self.lt.as_ref(),
+        };
+
+        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &val)?;
         state.end()
     }
 }
@@ -72,8 +80,9 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let term = TermRange::new("line_id", Range::gte(10).and_lte(20));
-        let json = serde_json::to_value(term).unwrap();
+        let range = Range::new().field("line_id").gte(10).lte(20);
+
+        let json = serde_json::to_value(range).unwrap();
 
         let expected = serde_json::json!({
             "line_id": {

@@ -1,23 +1,40 @@
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Terms {
-    field: String,
-    value: Vec<Value>,
+    field: Option<String>,
+    values: Vec<Value>,
 }
 
 impl Terms {
-    pub fn new<F, V, T>(field: F, value: V) -> Self
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn field<T: Into<String>>(self, field: T) -> Self {
+        Self {
+            field: Some(field.into()),
+            ..self
+        }
+    }
+
+    pub fn values<V, T>(self, values: V) -> Self
     where
-        F: Into<String>,
         V: IntoIterator<Item = T>,
         T: Into<Value>,
     {
         Self {
-            field: field.into(),
-            value: value.into_iter().map(|v| v.into()).collect(),
+            values: values.into_iter().map(|v| v.into()).collect(),
+            ..self
         }
+    }
+
+    pub fn value<T: Into<Value>>(self, value: T) -> Self {
+        let mut values = self.values;
+        values.push(value.into());
+
+        Self { values, ..self }
     }
 }
 
@@ -27,7 +44,7 @@ impl Serialize for Terms {
         S: Serializer,
     {
         let mut state = serializer.serialize_map(Some(1))?;
-        state.serialize_entry(&self.field, &self.value)?;
+        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &self.values)?;
         state.end()
     }
 }
@@ -38,8 +55,8 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let term = Terms::new("line_id", vec![61809, 61810]);
-        let json = serde_json::to_value(term).unwrap();
+        let terms = Terms::new().field("line_id").values(vec![61809, 61810]);
+        let json = serde_json::to_value(terms).unwrap();
 
         let expected = serde_json::json!({
             "line_id": [61809, 61810]

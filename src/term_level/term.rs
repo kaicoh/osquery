@@ -34,7 +34,7 @@ impl Serialize for Term {
         S: Serializer,
     {
         let mut map: HashMap<&str, &Value> = HashMap::new();
-        map.insert("value", &self.value.as_ref().unwrap_or(&Value::Null));
+        map.insert("value", self.value.as_ref().unwrap_or(&Value::Null));
 
         let mut term = serializer.serialize_map(Some(1))?;
         term.serialize_entry(self.field.as_deref().unwrap_or_default(), &map)?;
@@ -48,9 +48,7 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let term = Term::new()
-            .field("line_id")
-            .value(61809);
+        let term = Term::new().field("line_id").value(61809);
 
         let json = serde_json::to_value(term).unwrap();
 

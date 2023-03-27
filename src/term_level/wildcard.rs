@@ -2,21 +2,28 @@ use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Wildcard {
-    field: String,
-    value: Value,
+    field: Option<String>,
+    value: Option<Value>,
 }
 
 impl Wildcard {
-    pub fn new<F, V>(field: F, value: V) -> Self
-    where
-        F: Into<String>,
-        V: Into<Value>,
-    {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn field<T: Into<String>>(self, field: T) -> Self {
         Self {
-            field: field.into(),
-            value: value.into(),
+            field: Some(field.into()),
+            ..self
+        }
+    }
+
+    pub fn value<T: Into<Value>>(self, value: T) -> Self {
+        Self {
+            value: Some(value.into()),
+            ..self
         }
     }
 }
@@ -27,10 +34,10 @@ impl Serialize for Wildcard {
         S: Serializer,
     {
         let mut map: HashMap<&str, &Value> = HashMap::new();
-        map.insert("value", &self.value);
+        map.insert("value", self.value.as_ref().unwrap_or(&Value::Null));
 
         let mut state = serializer.serialize_map(Some(1))?;
-        state.serialize_entry(&self.field, &map)?;
+        state.serialize_entry(self.field.as_deref().unwrap_or_default(), &map)?;
         state.end()
     }
 }
@@ -41,7 +48,8 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let wc = Wildcard::new("speaker", "H*Y");
+        let wc = Wildcard::new().field("speaker").value("H*Y");
+
         let json = serde_json::to_value(wc).unwrap();
 
         let expected = serde_json::json!({
