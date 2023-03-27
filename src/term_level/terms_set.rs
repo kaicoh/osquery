@@ -4,9 +4,7 @@ use serde_json::Value;
 #[derive(Debug, Default, Clone)]
 pub struct TermsSet {
     field: Option<String>,
-    values: Vec<Value>,
-    min_should_match_field: Option<String>,
-    min_should_match_script: Option<String>,
+    value: TermsSetValues,
 }
 
 impl TermsSet {
@@ -26,54 +24,64 @@ impl TermsSet {
         V: IntoIterator<Item = T>,
         T: Into<Value>,
     {
-        Self {
-            values: values.into_iter().map(|v| v.into()).collect(),
-            ..self
-        }
+        let value = TermsSetValues {
+            terms: values.into_iter().map(|v| v.into()).collect(),
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
-    pub fn value<T: Into<Value>>(self, value: T) -> Self {
-        let mut values = self.values;
-        values.push(value.into());
+    pub fn value<T: Into<Value>>(self, val: T) -> Self {
+        let mut terms = self.value.terms;
+        terms.push(val.into());
 
-        Self { values, ..self }
+        let value = TermsSetValues {
+            terms,
+            ..self.value
+        };
+
+        Self { value, ..self }
     }
 
     pub fn minimum_should_match_field<T>(self, field: T) -> Self
     where
         T: Into<String>,
     {
-        Self {
-            min_should_match_field: Some(field.into()),
-            ..self
-        }
+        let value = TermsSetValues {
+            minimum_should_match_field: Some(field.into()),
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     pub fn minimum_should_match_script<T>(self, script: T) -> Self
     where
         T: Into<String>,
     {
-        Self {
-            min_should_match_script: Some(script.into()),
-            ..self
-        }
+        let value = TermsSetValues {
+            minimum_should_match_script: Some(MinShouldMatchScript {
+                source: script.into()
+            }),
+            ..self.value
+        };
+        Self { value, ..self }
     }
 }
 
-#[derive(Debug, serde::Serialize)]
-struct TermsSetValues<'a> {
-    terms: &'a Vec<Value>,
+#[derive(Debug, Default, Clone, serde::Serialize)]
+struct TermsSetValues {
+    terms: Vec<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    minimum_should_match_field: Option<&'a str>,
+    minimum_should_match_field: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    minimum_should_match_script: Option<MinShouldMatchScript<'a>>,
+    minimum_should_match_script: Option<MinShouldMatchScript>,
 }
 
-#[derive(Debug, serde::Serialize)]
-struct MinShouldMatchScript<'a> {
-    source: &'a str,
+#[derive(Debug, Clone, serde::Serialize)]
+struct MinShouldMatchScript {
+    source: String,
 }
 
 impl Serialize for TermsSet {
@@ -82,17 +90,7 @@ impl Serialize for TermsSet {
         S: Serializer,
     {
         let mut state = serializer.serialize_map(Some(1))?;
-
-        let val = TermsSetValues {
-            terms: &self.values,
-            minimum_should_match_field: self.min_should_match_field.as_deref(),
-            minimum_should_match_script: self
-                .min_should_match_script
-                .as_ref()
-                .map(|s| MinShouldMatchScript { source: s }),
-        };
-
-        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &val)?;
+        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &self.value)?;
         state.end()
     }
 }

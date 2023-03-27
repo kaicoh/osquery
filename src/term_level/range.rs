@@ -4,25 +4,22 @@ use serde_json::Value;
 #[derive(Debug, Default, Clone)]
 pub struct Range {
     field: Option<String>,
-    gte: Option<Value>,
-    gt: Option<Value>,
-    lte: Option<Value>,
-    lt: Option<Value>,
+    value: RangeValues,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize)]
-struct RangeValues<'a> {
+struct RangeValues {
     #[serde(skip_serializing_if = "Option::is_none")]
-    gte: Option<&'a Value>,
+    gte: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    gt: Option<&'a Value>,
+    gt: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    lte: Option<&'a Value>,
+    lte: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    lt: Option<&'a Value>,
+    lt: Option<Value>,
 }
 
 impl Range {
@@ -43,10 +40,11 @@ macro_rules! setter {
         impl Range {
             $(
                 pub fn $attr<T: Into<Value>>(self, val: T) -> Self {
-                    Self {
+                    let value = RangeValues {
                         $attr: Some(val.into()),
-                        ..self
-                    }
+                        ..self.value
+                    };
+                    Self { value, ..self }
                 }
             )*
         }
@@ -61,15 +59,7 @@ impl Serialize for Range {
         S: Serializer,
     {
         let mut state = serializer.serialize_map(Some(1))?;
-
-        let val = RangeValues {
-            gte: self.gte.as_ref(),
-            gt: self.gt.as_ref(),
-            lte: self.lte.as_ref(),
-            lt: self.lt.as_ref(),
-        };
-
-        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &val)?;
+        state.serialize_entry(&self.field.as_deref().unwrap_or_default(), &self.value)?;
         state.end()
     }
 }

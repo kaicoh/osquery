@@ -4,12 +4,7 @@ use serde_json::Value;
 #[derive(Debug, Default, Clone)]
 pub struct Fuzzy {
     field: Option<String>,
-    value: Option<Value>,
-    fuzziness: Option<String>,
-    max_expansions: Option<u64>,
-    prefix_length: Option<u64>,
-    transpositions: Option<bool>,
-    rewrite: Option<String>,
+    value: FuzzyValues,
 }
 
 impl Fuzzy {
@@ -24,72 +19,78 @@ impl Fuzzy {
         }
     }
 
-    pub fn value<T: Into<Value>>(self, value: T) -> Self {
-        Self {
-            value: Some(value.into()),
-            ..self
-        }
+    pub fn value<T: Into<Value>>(self, val: T) -> Self {
+        let value = FuzzyValues {
+            value: Some(val.into()),
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     /// Sets fuzziness field.
     pub fn fuzziness<S: Into<String>>(self, f: S) -> Self {
-        Self {
+        let value = FuzzyValues {
             fuzziness: Some(f.into()),
-            ..self
-        }
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     /// Sets max_expansions field.
     pub fn max_expansions<S: Into<u64>>(self, m: S) -> Self {
-        Self {
+        let value = FuzzyValues {
             max_expansions: Some(m.into()),
-            ..self
-        }
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     /// Sets prefix_length field.
     pub fn prefix_length<S: Into<u64>>(self, p: S) -> Self {
-        Self {
+        let value = FuzzyValues {
             prefix_length: Some(p.into()),
-            ..self
-        }
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     /// Sets transpositions field.
     pub fn transpositions(self, t: bool) -> Self {
-        Self {
+        let value = FuzzyValues {
             transpositions: Some(t),
-            ..self
-        }
+            ..self.value
+        };
+        Self { value, ..self }
     }
 
     /// Sets rewrite field.
     pub fn rewrite<S: Into<String>>(self, r: S) -> Self {
-        Self {
+        let value = FuzzyValues {
             rewrite: Some(r.into()),
-            ..self
-        }
+            ..self.value
+        };
+        Self { value, ..self }
     }
 }
 
-#[derive(Debug, Clone, serde::Serialize)]
-struct FuzzyValues<'a> {
-    value: &'a Value,
+#[derive(Debug, Default, Clone, serde::Serialize)]
+struct FuzzyValues {
+    value: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    fuzziness: Option<&'a str>,
+    fuzziness: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    max_expansions: Option<&'a u64>,
+    max_expansions: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    prefix_length: Option<&'a u64>,
+    prefix_length: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    transpositions: Option<&'a bool>,
+    transpositions: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    rewrite: Option<&'a str>,
+    rewrite: Option<String>,
 }
 
 impl Serialize for Fuzzy {
@@ -98,17 +99,7 @@ impl Serialize for Fuzzy {
         S: Serializer,
     {
         let mut term = serializer.serialize_map(Some(1))?;
-
-        let val = FuzzyValues {
-            value: self.value.as_ref().unwrap_or(&Value::Null),
-            fuzziness: self.fuzziness.as_deref(),
-            max_expansions: self.max_expansions.as_ref(),
-            prefix_length: self.prefix_length.as_ref(),
-            transpositions: self.transpositions.as_ref(),
-            rewrite: self.rewrite.as_deref(),
-        };
-
-        term.serialize_entry(self.field.as_deref().unwrap_or_default(), &val)?;
+        term.serialize_entry(self.field.as_deref().unwrap_or_default(), &self.value)?;
         term.end()
     }
 }
