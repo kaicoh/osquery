@@ -1,10 +1,12 @@
 use serde::Serialize;
 
 mod match_bool_prefix;
+mod match_phrase;
 mod mtch;
 mod multi_match;
 
 pub use match_bool_prefix::MatchBoolPrefix;
+pub use match_phrase::MatchPhrase;
 pub use mtch::Match;
 pub use multi_match::MultiMatch;
 
@@ -14,6 +16,7 @@ pub enum FullText {
     Match(Match),
     MultiMatch(MultiMatch),
     MatchBoolPrefix(MatchBoolPrefix),
+    MatchPhrase(MatchPhrase),
 }
 
 macro_rules! from_types {
@@ -31,5 +34,6 @@ macro_rules! from_types {
 from_types! {
     Match,
     MultiMatch,
-    MatchBoolPrefix
+    MatchBoolPrefix,
+    MatchPhrase
 }
