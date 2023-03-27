@@ -3,6 +3,7 @@ use serde::Serialize;
 pub mod full_text;
 pub mod term_level;
 
+use full_text::FullText;
 use term_level::TermLevel;
 
 #[derive(Debug, Clone)]
@@ -32,6 +33,7 @@ impl Query {
     ///     );
     ///
     /// let json = serde_json::to_value(query).unwrap();
+    ///
     /// let expected = serde_json::json!({
     ///     "query": {
     ///         "term": {
@@ -49,9 +51,48 @@ impl Query {
             query: query.into(),
         }
     }
+
+    /// Build "full_text" query
+    ///
+    /// ```
+    /// use osquery::{full_text::Match, Query};
+    ///
+    /// let query = Query::new()
+    ///     .full_text(
+    ///         Match::new()
+    ///             .field("title")
+    ///             .value("wind")
+    ///             .fuzziness("AUTO")
+    ///     );
+    ///
+    /// let json = serde_json::to_value(query).unwrap();
+    ///
+    /// let expected = serde_json::json!({
+    ///     "query": {
+    ///         "match": {
+    ///             "title": {
+    ///                 "query": "wind",
+    ///                 "fuzziness": "AUTO"
+    ///             }
+    ///         }
+    ///     }
+    /// });
+    ///
+    /// assert_eq!(json, expected);
+    /// ```
+    pub fn full_text<T: Into<FullText>>(self, query: T) -> FullTextQuery {
+        FullTextQuery {
+            query: query.into(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct TermLevelQuery {
     query: TermLevel,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct FullTextQuery {
+    query: FullText,
 }
