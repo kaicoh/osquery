@@ -60,7 +60,7 @@ impl TermsSet {
     {
         let value = TermsSetValues {
             minimum_should_match_script: Some(MinShouldMatchScript {
-                source: script.into()
+                source: script.into(),
             }),
             ..self.value
         };
