@@ -5,21 +5,24 @@ mod match_phrase;
 mod match_phrase_prefix;
 mod mtch;
 mod multi_match;
+mod query_string;
 
 pub use match_bool_prefix::MatchBoolPrefix;
 pub use match_phrase::MatchPhrase;
 pub use match_phrase_prefix::MatchPhrasePrefix;
 pub use mtch::Match;
 pub use multi_match::MultiMatch;
+pub use query_string::QueryString;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FullText {
-    Match(Match),
-    MultiMatch(MultiMatch),
-    MatchBoolPrefix(MatchBoolPrefix),
-    MatchPhrase(MatchPhrase),
-    MatchPhrasePrefix(MatchPhrasePrefix),
+    Match(Box<Match>),
+    MultiMatch(Box<MultiMatch>),
+    MatchBoolPrefix(Box<MatchBoolPrefix>),
+    MatchPhrase(Box<MatchPhrase>),
+    MatchPhrasePrefix(Box<MatchPhrasePrefix>),
+    QueryString(Box<QueryString>),
 }
 
 macro_rules! from_types {
@@ -27,7 +30,7 @@ macro_rules! from_types {
         $(
             impl From<$ty> for FullText {
                 fn from(val: $ty) -> Self {
-                    Self::$ty(val.into())
+                    Self::$ty(Box::new(val.into()))
                 }
             }
         )*
@@ -39,5 +42,6 @@ from_types! {
     MultiMatch,
     MatchBoolPrefix,
     MatchPhrase,
-    MatchPhrasePrefix
+    MatchPhrasePrefix,
+    QueryString
 }
