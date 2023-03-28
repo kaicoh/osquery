@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+mod match_all;
 mod match_bool_prefix;
 mod match_phrase;
 mod match_phrase_prefix;
@@ -8,6 +9,7 @@ mod multi_match;
 mod query_string;
 mod simple_query_string;
 
+pub use match_all::MatchAll;
 pub use match_bool_prefix::MatchBoolPrefix;
 pub use match_phrase::MatchPhrase;
 pub use match_phrase_prefix::MatchPhrasePrefix;
@@ -26,6 +28,7 @@ pub enum FullText {
     MatchPhrasePrefix(Box<MatchPhrasePrefix>),
     QueryString(Box<QueryString>),
     SimpleQueryString(Box<SimpleQueryString>),
+    MatchAll(Box<MatchAll>),
 }
 
 macro_rules! from_types {
@@ -47,5 +50,6 @@ from_types! {
     MatchPhrase,
     MatchPhrasePrefix,
     QueryString,
-    SimpleQueryString
+    SimpleQueryString,
+    MatchAll
 }
