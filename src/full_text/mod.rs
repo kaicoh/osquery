@@ -6,6 +6,7 @@ mod match_phrase_prefix;
 mod mtch;
 mod multi_match;
 mod query_string;
+mod simple_query_string;
 
 pub use match_bool_prefix::MatchBoolPrefix;
 pub use match_phrase::MatchPhrase;
@@ -13,6 +14,7 @@ pub use match_phrase_prefix::MatchPhrasePrefix;
 pub use mtch::Match;
 pub use multi_match::MultiMatch;
 pub use query_string::QueryString;
+pub use simple_query_string::SimpleQueryString;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -23,6 +25,7 @@ pub enum FullText {
     MatchPhrase(Box<MatchPhrase>),
     MatchPhrasePrefix(Box<MatchPhrasePrefix>),
     QueryString(Box<QueryString>),
+    SimpleQueryString(Box<SimpleQueryString>),
 }
 
 macro_rules! from_types {
@@ -43,5 +46,6 @@ from_types! {
     MatchBoolPrefix,
     MatchPhrase,
     MatchPhrasePrefix,
-    QueryString
+    QueryString,
+    SimpleQueryString
 }
