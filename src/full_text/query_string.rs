@@ -1,3 +1,4 @@
+use super::options::Fuzziness;
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -11,7 +12,7 @@ pub struct QueryString {
     typ: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    fuzziness: Option<String>,
+    fuzziness: Option<Fuzziness>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzzy_transpositions: Option<bool>,
@@ -95,7 +96,7 @@ impl QueryString {
         }
     }
 
-    pub fn fuzziness<T: Into<String>>(self, fuzziness: T) -> Self {
+    pub fn fuzziness<T: Into<Fuzziness>>(self, fuzziness: T) -> Self {
         Self {
             fuzziness: Some(fuzziness.into()),
             ..self
@@ -235,7 +236,7 @@ mod tests {
             .query("the wind AND (rises OR rising)")
             .default_field("title")
             .typ("best_fields")
-            .fuzziness("AUTO")
+            .fuzziness(Fuzziness::Auto)
             .fuzzy_transpositions(true)
             .fuzzy_max_expansions(50 as u64)
             .fuzzy_prefix_length(0 as u64)

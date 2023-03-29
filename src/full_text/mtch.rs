@@ -1,3 +1,4 @@
+use super::options::Fuzziness;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
@@ -31,7 +32,7 @@ impl Match {
         self.value(value)
     }
 
-    pub fn fuzziness<T: Into<String>>(self, fuzziness: T) -> Self {
+    pub fn fuzziness<T: Into<Fuzziness>>(self, fuzziness: T) -> Self {
         let value = MatchValues {
             fuzziness: Some(fuzziness.into()),
             ..self.value
@@ -117,7 +118,7 @@ struct MatchValues {
     query: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    fuzziness: Option<String>,
+    fuzziness: Option<Fuzziness>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzzy_transpositions: Option<bool>,
@@ -164,13 +165,16 @@ mod tests {
 
     #[test]
     fn it_serializes_to_json() {
-        let term = Match::new().field("title").value("wind").fuzziness("AUTO");
+        let term = Match::new()
+            .field("title")
+            .value("wind")
+            .fuzziness(4 as u64);
         let json = serde_json::to_value(term).unwrap();
 
         let expected = serde_json::json!({
             "title": {
                 "query": "wind",
-                "fuzziness": "AUTO"
+                "fuzziness": 4
             }
         });
 

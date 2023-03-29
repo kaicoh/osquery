@@ -55,14 +55,15 @@ impl Query {
     /// Build "full_text" query
     ///
     /// ```
-    /// use osquery::{full_text::Match, Query};
+    /// use osquery::Query;
+    /// use osquery::full_text::{Match, options::Fuzziness};
     ///
     /// let query = Query::new()
     ///     .full_text(
     ///         Match::new()
     ///             .field("title")
     ///             .value("wind")
-    ///             .fuzziness("AUTO")
+    ///             .fuzziness(Fuzziness::Auto)
     ///     );
     ///
     /// let json = serde_json::to_value(query).unwrap();

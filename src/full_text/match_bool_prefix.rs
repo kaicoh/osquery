@@ -1,3 +1,4 @@
+use super::options::Fuzziness;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
@@ -31,7 +32,7 @@ impl MatchBoolPrefix {
         self.value(value)
     }
 
-    pub fn fuzziness<T: Into<String>>(self, fuzziness: T) -> Self {
+    pub fn fuzziness<T: Into<Fuzziness>>(self, fuzziness: T) -> Self {
         let value = MatchBoolPrefixValues {
             fuzziness: Some(fuzziness.into()),
             ..self.value
@@ -93,7 +94,7 @@ struct MatchBoolPrefixValues {
     query: Option<Value>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    fuzziness: Option<String>,
+    fuzziness: Option<Fuzziness>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzzy_transpositions: Option<bool>,
@@ -134,7 +135,7 @@ mod tests {
         let query = MatchBoolPrefix::new()
             .field("title")
             .value("rises wi")
-            .fuzziness("AUTO")
+            .fuzziness(Fuzziness::Auto)
             .analyzer("standard");
         let json = serde_json::to_value(query).unwrap();
 
