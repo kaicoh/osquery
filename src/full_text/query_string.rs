@@ -1,4 +1,4 @@
-use super::options::{Fuzziness, Operator};
+use crate::options::{Fuzziness, Operator};
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]

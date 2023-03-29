@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+pub mod options;
 pub mod full_text;
 pub mod term_level;
 
@@ -55,8 +56,7 @@ impl Query {
     /// Build "full_text" query
     ///
     /// ```
-    /// use osquery::Query;
-    /// use osquery::full_text::{Match, options::Fuzziness};
+    /// use osquery::{full_text::Match, options::Fuzziness, Query};
     ///
     /// let query = Query::new()
     ///     .full_text(

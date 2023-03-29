@@ -1,3 +1,4 @@
+use crate::options::Rewrite;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
@@ -64,7 +65,7 @@ impl Fuzzy {
     }
 
     /// Sets rewrite field.
-    pub fn rewrite<S: Into<String>>(self, r: S) -> Self {
+    pub fn rewrite<S: Into<Rewrite>>(self, r: S) -> Self {
         let value = FuzzyValues {
             rewrite: Some(r.into()),
             ..self.value
@@ -90,7 +91,7 @@ struct FuzzyValues {
     transpositions: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    rewrite: Option<String>,
+    rewrite: Option<Rewrite>,
 }
 
 impl Serialize for Fuzzy {
@@ -117,7 +118,7 @@ mod tests {
             .max_expansions(40 as u64)
             .prefix_length(0 as u64)
             .transpositions(true)
-            .rewrite("constant_score");
+            .rewrite(Rewrite::ConstantScore);
 
         let json = serde_json::to_value(term).unwrap();
 

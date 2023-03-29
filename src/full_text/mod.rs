@@ -6,7 +6,6 @@ mod match_phrase;
 mod match_phrase_prefix;
 mod mtch;
 mod multi_match;
-pub mod options;
 mod query_string;
 mod simple_query_string;
 

@@ -1,4 +1,4 @@
-use super::options::{Fuzziness, Operator};
+use crate::options::{Fuzziness, Operator};
 use serde::Serialize;
 use serde_json::Value;
 
