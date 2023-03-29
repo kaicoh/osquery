@@ -1,4 +1,4 @@
-use crate::options::{Fuzziness, Operator, Type};
+use crate::options::{Fuzziness, Operator, Type, ZeroTermsQuery};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -44,7 +44,7 @@ pub struct MultiMatch {
     auto_generate_synonyms_phrase_query: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    zero_terms_query: Option<String>,
+    zero_terms_query: Option<ZeroTermsQuery>,
 }
 
 impl MultiMatch {
@@ -167,7 +167,7 @@ impl MultiMatch {
         }
     }
 
-    pub fn zero_terms_query<T: Into<String>>(self, zero_terms_query: T) -> Self {
+    pub fn zero_terms_query<T: Into<ZeroTermsQuery>>(self, zero_terms_query: T) -> Self {
         Self {
             zero_terms_query: Some(zero_terms_query.into()),
             ..self

@@ -1,4 +1,4 @@
-use crate::options::{Fuzziness, Operator};
+use crate::options::{Fuzziness, Operator, ZeroTermsQuery};
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
@@ -72,7 +72,7 @@ impl Match {
         Self { value, ..self }
     }
 
-    pub fn zero_terms_query<T: Into<String>>(self, zero_terms_query: T) -> Self {
+    pub fn zero_terms_query<T: Into<ZeroTermsQuery>>(self, zero_terms_query: T) -> Self {
         let value = MatchValues {
             zero_terms_query: Some(zero_terms_query.into()),
             ..self.value
@@ -133,7 +133,7 @@ struct MatchValues {
     analyzer: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    zero_terms_query: Option<String>,
+    zero_terms_query: Option<ZeroTermsQuery>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     lenient: Option<bool>,

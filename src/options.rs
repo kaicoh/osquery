@@ -55,6 +55,13 @@ pub enum Type {
     PhrasePrefix,
 }
 
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ZeroTermsQuery {
+    None,
+    All,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -235,6 +242,30 @@ mod tests {
         .unwrap();
         let expected = serde_json::json!({
             "value": "phrase_prefix"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_zero_terms_query_none() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": ZeroTermsQuery::None,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "none"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_zero_terms_query_all() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": ZeroTermsQuery::All,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "all"
         });
         assert_eq!(json, expected);
     }
