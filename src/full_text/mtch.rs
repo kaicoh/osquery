@@ -104,7 +104,7 @@ impl Match {
         Self { value, ..self }
     }
 
-    pub fn boost<T: Into<u64>>(self, boost: T) -> Self {
+    pub fn boost<T: Into<f64>>(self, boost: T) -> Self {
         let value = MatchValues {
             boost: Some(boost.into()),
             ..self.value
@@ -145,7 +145,7 @@ struct MatchValues {
     max_expansions: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    boost: Option<u64>,
+    boost: Option<f64>,
 }
 
 impl Serialize for Match {

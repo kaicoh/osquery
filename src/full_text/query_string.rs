@@ -36,7 +36,7 @@ pub struct QueryString {
     lenient: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    boost: Option<u64>,
+    boost: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     allow_leading_wildcard: Option<bool>,
@@ -152,7 +152,7 @@ impl QueryString {
         }
     }
 
-    pub fn boost<T: Into<u64>>(self, boost: T) -> Self {
+    pub fn boost<T: Into<f64>>(self, boost: T) -> Self {
         Self {
             boost: Some(boost.into()),
             ..self
@@ -244,7 +244,7 @@ mod tests {
             .default_operator("or")
             .analyzer("standard")
             .lenient(false)
-            .boost(1 as u64)
+            .boost(1.4)
             .allow_leading_wildcard(true)
             .enable_position_increments(true)
             .phrase_slop(3 as u64)
@@ -269,7 +269,7 @@ mod tests {
             "default_operator": "or",
             "analyzer": "standard",
             "lenient": false,
-            "boost": 1,
+            "boost": 1.4,
             "allow_leading_wildcard": true,
             "enable_position_increments": true,
             "phrase_slop": 3,

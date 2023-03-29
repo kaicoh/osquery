@@ -23,7 +23,7 @@ pub struct MultiMatch {
     analyzer: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    boost: Option<u64>,
+    boost: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzziness: Option<Fuzziness>,
@@ -115,7 +115,7 @@ impl MultiMatch {
         }
     }
 
-    pub fn boost<T: Into<u64>>(self, boost: T) -> Self {
+    pub fn boost<T: Into<f64>>(self, boost: T) -> Self {
         Self {
             boost: Some(boost.into()),
             ..self
