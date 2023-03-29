@@ -1,4 +1,4 @@
-use crate::options::{Fuzziness, Operator};
+use crate::options::{Fuzziness, Operator, Type};
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -9,7 +9,7 @@ pub struct QueryString {
     default_field: Option<String>,
 
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    typ: Option<String>,
+    typ: Option<Type>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fuzziness: Option<Fuzziness>,
@@ -89,7 +89,7 @@ impl QueryString {
         }
     }
 
-    pub fn typ<T: Into<String>>(self, typ: T) -> Self {
+    pub fn typ<T: Into<Type>>(self, typ: T) -> Self {
         Self {
             typ: Some(typ.into()),
             ..self
@@ -235,7 +235,7 @@ mod tests {
         let query = QueryString::new()
             .query("the wind AND (rises OR rising)")
             .default_field("title")
-            .typ("best_fields")
+            .typ(Type::BestFields)
             .fuzziness(Fuzziness::Auto)
             .fuzzy_transpositions(true)
             .fuzzy_max_expansions(50 as u64)

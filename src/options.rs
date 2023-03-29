@@ -45,6 +45,16 @@ pub enum Rewrite {
     TopTermsBlendedFreqsN,
 }
 
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Type {
+    BestFields,
+    MostFields,
+    CrossFields,
+    Phrase,
+    PhrasePrefix,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -165,6 +175,66 @@ mod tests {
         .unwrap();
         let expected = serde_json::json!({
             "value": "top_terms_blended_freqs_N"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_type_best_fields() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Type::BestFields,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "best_fields"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_type_most_fields() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Type::MostFields,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "most_fields"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_type_cross_fields() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Type::CrossFields,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "cross_fields"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_type_phrase() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Type::Phrase,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "phrase"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_type_phrase_prefix() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Type::PhrasePrefix,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "phrase_prefix"
         });
         assert_eq!(json, expected);
     }

@@ -1,4 +1,4 @@
-use crate::options::{Fuzziness, Operator};
+use crate::options::{Fuzziness, Operator, Type};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -8,7 +8,7 @@ pub struct MultiMatch {
     fields: Vec<String>,
 
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    typ: Option<String>,
+    typ: Option<Type>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     operator: Option<Operator>,
@@ -80,7 +80,7 @@ impl MultiMatch {
         self.value(query)
     }
 
-    pub fn typ<T: Into<String>>(self, typ: T) -> Self {
+    pub fn typ<T: Into<Type>>(self, typ: T) -> Self {
         Self {
             typ: Some(typ.into()),
             ..self
@@ -184,7 +184,7 @@ mod tests {
         let query = MultiMatch::new()
             .fields(vec!["title^4", "description"])
             .query("wind")
-            .typ("most_fields")
+            .typ(Type::MostFields)
             .operator(Operator::And)
             .minimum_should_match(3 as u64);
         let json = serde_json::to_value(query).unwrap();
