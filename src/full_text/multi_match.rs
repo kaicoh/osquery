@@ -1,4 +1,4 @@
-use super::options::Fuzziness;
+use super::options::{Fuzziness, Operator};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -11,7 +11,7 @@ pub struct MultiMatch {
     typ: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    operator: Option<String>,
+    operator: Option<Operator>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     minimum_should_match: Option<u64>,
@@ -87,7 +87,7 @@ impl MultiMatch {
         }
     }
 
-    pub fn operator<T: Into<String>>(self, operator: T) -> Self {
+    pub fn operator<T: Into<Operator>>(self, operator: T) -> Self {
         Self {
             operator: Some(operator.into()),
             ..self
@@ -185,7 +185,7 @@ mod tests {
             .fields(vec!["title^4", "description"])
             .query("wind")
             .typ("most_fields")
-            .operator("and")
+            .operator(Operator::And)
             .minimum_should_match(3 as u64);
         let json = serde_json::to_value(query).unwrap();
 

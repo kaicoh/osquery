@@ -24,6 +24,13 @@ impl Serialize for Fuzziness {
     }
 }
 
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Operator {
+    And,
+    Or,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -48,6 +55,30 @@ mod tests {
         .unwrap();
         let expected = serde_json::json!({
             "value": 30
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_operator_and() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Operator::And,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "and"
+        });
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn it_serializes_operator_or() {
+        let json = serde_json::to_value(serde_json::json!({
+            "value": Operator::Or,
+        }))
+        .unwrap();
+        let expected = serde_json::json!({
+            "value": "or"
         });
         assert_eq!(json, expected);
     }

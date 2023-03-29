@@ -1,4 +1,4 @@
-use super::options::Fuzziness;
+use super::options::{Fuzziness, Operator};
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -27,7 +27,7 @@ pub struct QueryString {
     minimum_should_match: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    default_operator: Option<String>,
+    default_operator: Option<Operator>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     analyzer: Option<String>,
@@ -131,7 +131,7 @@ impl QueryString {
         }
     }
 
-    pub fn default_operator<T: Into<String>>(self, default_operator: T) -> Self {
+    pub fn default_operator<T: Into<Operator>>(self, default_operator: T) -> Self {
         Self {
             default_operator: Some(default_operator.into()),
             ..self
@@ -241,7 +241,7 @@ mod tests {
             .fuzzy_max_expansions(50 as u64)
             .fuzzy_prefix_length(0 as u64)
             .minimum_should_match(1 as u64)
-            .default_operator("or")
+            .default_operator(Operator::Or)
             .analyzer("standard")
             .lenient(false)
             .boost(1.4)

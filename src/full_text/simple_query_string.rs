@@ -1,3 +1,4 @@
+use super::options::Operator;
 use serde::Serialize;
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -21,7 +22,7 @@ pub struct SimpleQueryString {
     minimum_should_match: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    default_operator: Option<String>,
+    default_operator: Option<Operator>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     analyzer: Option<String>,
@@ -107,7 +108,7 @@ impl SimpleQueryString {
         }
     }
 
-    pub fn default_operator<T: Into<String>>(self, default_operator: T) -> Self {
+    pub fn default_operator<T: Into<Operator>>(self, default_operator: T) -> Self {
         Self {
             default_operator: Some(default_operator.into()),
             ..self
@@ -167,7 +168,7 @@ mod tests {
             .fuzzy_max_expansions(50 as u64)
             .fuzzy_prefix_length(0 as u64)
             .minimum_should_match(1 as u64)
-            .default_operator("or")
+            .default_operator(Operator::Or)
             .analyzer("standard")
             .lenient(false)
             .quote_field_suffix("")

@@ -1,4 +1,4 @@
-use super::options::Fuzziness;
+use super::options::{Fuzziness, Operator};
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value;
 
@@ -48,7 +48,7 @@ impl MatchBoolPrefix {
         Self { value, ..self }
     }
 
-    pub fn operator<T: Into<String>>(self, operator: T) -> Self {
+    pub fn operator<T: Into<Operator>>(self, operator: T) -> Self {
         let value = MatchBoolPrefixValues {
             operator: Some(operator.into()),
             ..self.value
@@ -100,7 +100,7 @@ struct MatchBoolPrefixValues {
     fuzzy_transpositions: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    operator: Option<String>,
+    operator: Option<Operator>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     minimum_should_match: Option<u64>,
